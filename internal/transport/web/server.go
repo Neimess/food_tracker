@@ -1,8 +1,11 @@
 package web
 
 import (
+	"context"
+	"errors"
 	"html/template"
 	"net/http"
+	"time"
 
 	"github.com/Neimess/food_tracker/internal/repository"
 )
@@ -10,6 +13,7 @@ import (
 type Server struct {
 	mux *http.ServeMux
 	tpl *template.Template
+	srv *http.Server
 
 	Cat *CategoriesHandlers
 	Ing *IngredientsHandlers
@@ -75,5 +79,27 @@ func NewServer(
 }
 
 func (s *Server) ListenAndServe(addr string) error {
-	return http.ListenAndServe(addr, s.mux)
+	s.srv = &http.Server{
+		Addr:         addr,
+		Handler:      s.mux,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+	err := s.srv.ListenAndServe()
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		return err
+	}
+	return nil
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	if s.srv == nil {
+		return nil
+	}
+	err := s.srv.Shutdown(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }

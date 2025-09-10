@@ -3,7 +3,7 @@ package tg
 import "gopkg.in/telebot.v3"
 
 func (bot *Bot) registerHandlers() {
-	b := bot.b
+	b := bot.B
 
 	b.Handle("/start", bot.handleStart)
 	b.Handle("/menu", bot.handleMenu)

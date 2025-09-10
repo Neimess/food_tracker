@@ -29,21 +29,21 @@ type FoodIngredient struct {
 	FoodID         int64
 	IngredientID   int64
 	IngredientName string
-	Quantity       float64
+	Quantity       int64
 	Unit           string
 }
 
 type CartItem struct {
-	IngredientID   int64
-	Name 		   string
-	Unit           string
-	Qty            float64
-	Department     string
-	Checked        bool
+	IngredientID int64
+	Name         string
+	Unit         string
+	Qty          int64
+	Department   string
+	Checked      bool
 }
 
 type CompositionItem struct {
-    Ingredient Ingredient
-    Quantity   float64
-    Unit       string
+	Ingredient Ingredient
+	Quantity   int64
+	Unit       string
 }

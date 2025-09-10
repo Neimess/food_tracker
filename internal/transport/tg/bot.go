@@ -1,6 +1,7 @@
 package tg
 
 import (
+	"context"
 	"log"
 
 	"time"
@@ -10,11 +11,11 @@ import (
 )
 
 type Bot struct {
-	b   *telebot.Bot
+	B   *telebot.Bot
 	svc *service.PlannerService
 }
 
-func NewBot(token string, svc *service.PlannerService) (*Bot, error) {
+func NewBot(ctx context.Context, token string, svc *service.PlannerService) (*Bot, error) {
 	pref := telebot.Settings{
 		Token:  token,
 		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
@@ -23,11 +24,15 @@ func NewBot(token string, svc *service.PlannerService) (*Bot, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Bot{b: b, svc: svc}, nil
+	return &Bot{B: b, svc: svc}, nil
 }
 
 func (bot *Bot) Start() {
 	log.Println("Telegram bot started")
 	bot.registerHandlers()
-	bot.b.Start()
+	bot.B.Start()
+}
+
+func (bot *Bot) Stop() {
+	bot.B.Stop()
 }

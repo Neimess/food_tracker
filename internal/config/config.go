@@ -8,13 +8,12 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
-type TGToken string
 
 type Config struct {
 	Env       string  `yaml:"env" env:"ENV" envDefault:"dev"`
 	Version   string  `yaml:"version" env:"VERSION" end-default:"1.0.0"`
 	AdminCode string  `yaml:"admin_code" env:"ADMIN_CODE" envRequired:"true"`
-	TGToken   TGToken `yaml:"tg_token" env:"TG_TOKEN" envRequired:"true"`
+	TGToken   string `yaml:"tg_token" env:"TG_TOKEN" envRequired:"true"`
 }
 
 func MustLoad() *Config {

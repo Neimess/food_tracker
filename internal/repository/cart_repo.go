@@ -2,68 +2,99 @@ package repository
 
 import (
 	"context"
+	"errors"
+	"sort"
+	"strings"
 	"sync"
 
 	"github.com/Neimess/food_tracker/internal/domain"
 )
 
+type cartKey struct {
+	IngredientID int64
+	Unit         string
+}
+
 type CartRepoInMemory struct {
-	d  map[int64]domain.CartItem
+	d  map[cartKey]domain.CartItem
 	mu sync.RWMutex
 }
 
 func NewCartRepo() *CartRepoInMemory {
 	return &CartRepoInMemory{
-		d:  make(map[int64]domain.CartItem),
-		mu: sync.RWMutex{},
+		d: make(map[cartKey]domain.CartItem),
 	}
 }
 
-func (r *CartRepoInMemory) Add(ctx context.Context, item *domain.CartItem) error {
-	r.withLock(func(m map[int64]domain.CartItem) {
-		if ex, ok := m[item.IngredientID]; ok {
-			ex.Qty += item.Qty
-			m[item.IngredientID] = ex
-		} else {
-			m[item.IngredientID] = *item
+func (r *CartRepoInMemory) AddDelta(ctx context.Context, item *domain.CartItem) error {
+	if item == nil {
+		return errors.New("item is nil")
+	}
+
+	key := cartKey{
+		IngredientID: item.IngredientID,
+		Unit:         strings.TrimSpace(item.Unit),
+	}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	cur, ok := r.d[key]
+	if !ok {
+		cur = domain.CartItem{
+			IngredientID: item.IngredientID,
+			Name:         item.Name,
+			Department:   item.Department,
+			Unit:         key.Unit,
+			Qty:          0,
 		}
-	})
-	return nil
-}
+	} else {
+		if cur.Name == "" && item.Name != "" {
+			cur.Name = item.Name
+		}
+		if cur.Department == "" && item.Department != "" {
+			cur.Department = item.Department
+		}
+	}
 
-func (r *CartRepoInMemory) Remove(ctx context.Context, ingredientID int64) error {
-	r.withLock(func(m map[int64]domain.CartItem) {
-		delete(m, ingredientID)
-	})
-	return nil
-}
+	cur.Qty += item.Qty
+	if cur.Qty <= 0 {
+		delete(r.d, key)
+		return nil
+	}
 
-func (r *CartRepoInMemory) Clear(ctx context.Context) error {
-	r.withLock(func(m map[int64]domain.CartItem) {
-		r.d = make(map[int64]domain.CartItem)
-	})
+	r.d[key] = cur
 	return nil
 }
 
 func (r *CartRepoInMemory) List(ctx context.Context) ([]domain.CartItem, error) {
-	var res []domain.CartItem
-	r.withRLock(func(m map[int64]domain.CartItem) {
-		res = make([]domain.CartItem, 0, len(m))
-		for _, v := range m {
-			res = append(res, v)
-		}
-	})
-	return res, nil
-}
-
-func (r *CartRepoInMemory) withLock(fn func(m map[int64]domain.CartItem)) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	fn(r.d)
-}
-
-func (r *CartRepoInMemory) withRLock(fn func(m map[int64]domain.CartItem)) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	fn(r.d)
+
+	out := make([]domain.CartItem, 0, len(r.d))
+	for _, v := range r.d {
+		out = append(out, v)
+	}
+
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Department != out[j].Department {
+			return out[i].Department < out[j].Department
+		}
+		if out[i].Name != out[j].Name {
+			return out[i].Name < out[j].Name
+		}
+		if out[i].IngredientID != out[j].IngredientID {
+			return out[i].IngredientID < out[j].IngredientID
+		}
+		return out[i].Unit < out[j].Unit
+	})
+
+	return out, nil
+}
+
+func (r *CartRepoInMemory) Clear(ctx context.Context) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.d = make(map[cartKey]domain.CartItem)
+	return nil
 }
