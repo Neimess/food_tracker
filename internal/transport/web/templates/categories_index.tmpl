@@ -1,0 +1,16 @@
+{{template "layout.tmpl" .}}
+<h1>Категории блюд</h1>
+
+<a href="/admin/categories/new">+ Новая категория</a>
+
+<table>
+  <tr><th>Название</th><th></th></tr>
+  {{range .Items}}
+  <tr>
+    <td>{{.Name}}</td>
+    <td>
+      <a href="/admin/categories/{{.ID}}/edit">Править</a>
+    </td>
+  </tr>
+  {{end}}
+</table>

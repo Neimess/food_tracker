@@ -1,0 +1,19 @@
+{{template "layout.tmpl" .}}
+<h1>Блюда</h1>
+<a class="button" href="/admin/foods/new">+ Новое</a>
+<table>
+  <tr><th>Название</th><th>Категория</th><th>Сложное</th><th></th></tr>
+  {{range .Items}}
+  <tr>
+    <td>{{.Name}}</td>
+    <td>{{.CategoryName}}</td>
+    <td>{{if .IsComplex}}да{{else}}нет{{end}}</td>
+    <td>
+      <a href="/admin/foods/edit?id={{.ID}}">Править</a> |
+      <a href="/admin/foods/compose?id={{.ID}}">Состав</a>
+    </td>
+  </tr>
+  {{else}}
+  <tr><td colspan="5" style="text-align:center;opacity:.7">Пока пусто</td></tr>
+  {{end}}
+</table>

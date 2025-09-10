@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <title>Блюда</title>
+    <link rel="stylesheet" href="/admin/style.css">
+</head>
+
+<body>
+    <nav>
+        <a href="/admin/foods.html">Блюда</a> |
+        <a href="/admin/ingredients.html">Ингредиенты</a> |
+        <a href="/admin/categories.html">Категории блюд</a>
+    </nav>
+    <hr>
+
+    <h1>Блюда</h1>
+    <form class="inline" id="food-form">
+        <input name="name" placeholder="Название" required>
+        <select name="category_id" id="food-cat-select"></select>
+        <label><input type="checkbox" name="is_complex"> Сложное</label>
+        <button type="submit">+ Добавить</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Категория</th>
+                <th>Сложное</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="foods-tbody"></tbody>
+    </table>
+
+    <script src="/admin/foods.js"></script>
+</body>
+
+</html>
+    

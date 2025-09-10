@@ -1,0 +1,23 @@
+{{template "layout.tmpl" .}}
+<h1>Состав: {{.Food.Name}}</h1>
+<form method="post" action="/admin/foods/{{.Food.ID}}/compose/add">
+  <select name="ingredient_id">
+    {{range .AllIngs}}<option value="{{.ID}}">{{.Name}}</option>{{end}}
+  </select>
+  <input type="number" step="0.01" name="quantity" placeholder="Кол-во" required>
+  <input name="unit" placeholder="Ед. (г/мл/шт)" required>
+  <button>Добавить</button>
+</form>
+<table>
+<tr><th>Ингредиент</th><th>Кол-во</th><th>Ед.</th><th></th></tr>
+{{range .Rows}}
+<tr>
+  <td>{{.IngredientName}}</td><td>{{.Quantity}}</td><td>{{.Unit}}</td>
+  <td>
+    <form method="post" action="/admin/foods/{{$.Food.ID}}/compose/{{.IngredientID}}/del">
+      <button>Удалить</button>
+    </form>
+  </td>
+</tr>
+</table>
+{{end}}

@@ -1,0 +1,9 @@
+{{template "layout.tmpl" .}}
+<h1>{{if .Item}}Правка категории{{else}}Новая категория{{end}}</h1>
+
+<form method="post" action="{{if .Item}}/admin/categories/{{.Item.ID}}/save{{else}}/admin/categories/create{{end}}">
+  <label>Название
+    <input name="name" value="{{with .Item}}{{.Name}}{{end}}" required>
+  </label><br>
+  <button type="submit">Сохранить</button>
+</form>

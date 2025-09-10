@@ -1,0 +1,12 @@
+{{template "layout.tmpl" .}}
+<h1>{{if .Item}}Правка отдела{{else}}Новый отдел{{end}}</h1>
+
+<form method="post" action="{{if .Item}}/admin/departments/save{{else}}/admin/departments/create{{end}}">
+  {{if .Item}}<input type="hidden" name="id" value="{{.Item.ID}}">{{end}}
+  
+  <label>Название
+    <input type="text" name="name" value="{{with .Item}}{{.Name}}{{end}}" required>
+  </label><br>
+  
+  <button type="submit">Сохранить</button>
+</form>
