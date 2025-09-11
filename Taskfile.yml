@@ -21,7 +21,7 @@ tasks:
       - |
         go build -ldflags "-X 'main.Version={{.VERSION}}' \
                            -X 'main.BuildTime={{.BUILDTIME}}' \
-                           -X 'main.Commit={{.COMMIT}} \
+                           -X 'main.Commit={{.COMMIT}}' \
                            -s -w" \
                  -o bin/{{.BINARY}} cmd/app/main.go
     sources:
