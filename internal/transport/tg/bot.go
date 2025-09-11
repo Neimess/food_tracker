@@ -27,7 +27,7 @@ func NewBot(ctx context.Context, cfg *config.TelegramConfig, svc *service.Planne
 		Token: cfg.Token,
 		Poller: &telebot.Webhook{
 			Endpoint: &telebot.WebhookEndpoint{
-				PublicURL: cfg.URL + cfg.Token,
+				PublicURL: cfg.WebHookURL + cfg.Token,
 			},
 			Listen: cfg.Address,
 		},
