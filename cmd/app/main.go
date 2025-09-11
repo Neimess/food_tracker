@@ -29,7 +29,7 @@ func main() {
 	cfg := config.MustLoad()
 	cfg.App.Version = Version
 	log.Printf("Version: %s, BuildTime: %s, Env: %s", Version, BuildTime, cfg.App.Env)
-	
+
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
@@ -51,7 +51,7 @@ func main() {
 	fi := repository.NewFoodIngredientsRepo(db)
 	cart := repository.NewCartRepo("cart.json")
 
-	websrv := web.NewServer(cats, deps, ings, foods, fi)
+	websrv := web.NewServer(&cfg.HTTPServer, cats, deps, ings, foods, fi)
 	srvErr := make(chan error, 1)
 
 	go func() {
@@ -66,7 +66,7 @@ func main() {
 		log.Printf("preload failed: %v", err)
 	}
 
-	tgBot, err := tg.NewBot(ctx, cfg.Telegram.Token, cfg.Telegram.WebAppURL, cfg.Telegram.AllowedUsers, svcP)
+	tgBot, err := tg.NewBot(ctx, &cfg.Telegram, svcP)
 	if err != nil {
 		panic(err)
 	}

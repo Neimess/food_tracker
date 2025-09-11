@@ -53,7 +53,7 @@ func (bot *Bot) buildMenu(ctx context.Context) (string, *telebot.ReplyMarkup, er
 	rows = append(rows, kb.Row(btnCart, btnClear))
 
 	btnSettings := kb.WebApp("⚙️ Настройки", &telebot.WebApp{
-		URL: bot.webAppURL,
+		URL: bot.cfg.WebAppURL,
 	})
 	rows = append(rows, kb.Row(btnSettings))
 

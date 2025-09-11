@@ -4,20 +4,31 @@ import (
 	"flag"
 	"log"
 	"os"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	App      AppConfig      `yaml:"app"`
-	Telegram TelegramConfig `yaml:"telegram"`
-	DB       DBConfig       `yaml:"db"`
-	Cache    CacheConfig    `yaml:"cache"`
+	App        AppConfig      `yaml:"app"`
+	Telegram   TelegramConfig `yaml:"telegram"`
+	DB         DBConfig       `yaml:"db"`
+	Cache      CacheConfig    `yaml:"cache"`
+	HTTPServer HTTPServer     `yaml:"http_server"`
 }
 
 type AppConfig struct {
 	Env     string `yaml:"env" env:"ENV" env-default:"dev"`
 	Version string
+}
+
+type HTTPServer struct {
+	Address         string        `yaml:"address" env:"HTTP_ADDRESS" env-default:"localhost:8080"`
+	MaxHeaderBytes  int           `yaml:"max_header_bytes" env:"HTTP_MAX_HEADER_BYTES" env-default:"1048576"`
+	ReadTimeout     time.Duration `yaml:"read_timeout" env:"HTTP_READ_TIMEOUT" env-default:"10s"`
+	WriteTimeout    time.Duration `yaml:"write_timeout" env:"HTTP_WRITE_TIMEOUT" env-default:"10s"`
+	ShutdownTimeout time.Duration `yaml:"shutdown_timeout" env:"HTTP_SHUTDOWN_TIMEOUT" env-default:"5s"`
+	IdleTimeout     time.Duration `yaml:"idle_timeout"  env:"HTTP_IDLE_TIMEOUT"   env-default:"60s"`
 }
 
 type TelegramConfig struct {

@@ -8,6 +8,7 @@ import (
 
 	"time"
 
+	"github.com/Neimess/food_tracker/internal/config"
 	"github.com/Neimess/food_tracker/internal/service"
 	"gopkg.in/telebot.v3"
 	"gopkg.in/telebot.v3/middleware"
@@ -20,13 +21,12 @@ type Bot struct {
 	lastMenus map[int64]int
 	mu        sync.Mutex
 
-	usersWhiteList []int64
-	webAppURL      string
+	cfg *config.TelegramConfig
 }
 
-func NewBot(ctx context.Context, token, webAppURL string, usersWhiteList []int64, svc *service.PlannerService) (*Bot, error) {
+func NewBot(ctx context.Context, cfg *config.TelegramConfig, svc *service.PlannerService) (*Bot, error) {
 	pref := telebot.Settings{
-		Token:       token,
+		Token:       cfg.Token,
 		Poller:      &telebot.LongPoller{Timeout: 10 * time.Second},
 		Synchronous: false,
 		OnError: func(err error, c telebot.Context) {
@@ -41,13 +41,13 @@ func NewBot(ctx context.Context, token, webAppURL string, usersWhiteList []int64
 	if err != nil {
 		return nil, err
 	}
-	return &Bot{B: b, svc: svc, lastMenus: make(map[int64]int), usersWhiteList: usersWhiteList, webAppURL: webAppURL}, nil
+	return &Bot{B: b, svc: svc, lastMenus: make(map[int64]int), cfg: cfg}, nil
 }
 
 func (bot *Bot) Start() {
 	log.Println("Telegram bot started")
 	bot.B.Use(ShortLogger)
-	bot.B.Use(middleware.Whitelist(bot.usersWhiteList...))
+	bot.B.Use(middleware.Whitelist(bot.cfg.AllowedUsers...))
 	bot.B.Use(middleware.AutoRespond())
 	bot.B.Use(middleware.Recover())
 	bot.registerHandlers()

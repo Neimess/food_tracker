@@ -1,13 +1,21 @@
 app:
-  env: dev            
+  env: dev
 
 telegram:
-  token: "PUT_YOUR_TG_BOT_TOKEN_HERE"     
-  allowed_users: []                       
+  token: "PUT_YOUR_TG_BOT_TOKEN_HERE"
+  allowed_users: []
   webapp_url: "https://your-domain.com"
 
 db:
-  path: "storage.db"                      
+  path: "storage.db"
 
 cache:
-  path: ".cache/food-tracker"             
+  path: ".cache/food-tracker"
+
+http_server:
+  address: "0.0.0.0:8080"
+  max_header_bytes: 1048576
+  read_timeout: 10s
+  write_timeout: 10s
+  shutdown_timeout: 5s
+  idle_timeout: 120s

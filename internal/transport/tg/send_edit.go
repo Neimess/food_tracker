@@ -59,45 +59,45 @@ func WithAllowWithoutReply() SendEditOption {
 // SendOrEdit отправляет или редактирует сообщение.
 // text: текст сообщения (если пустой и edit=true, а markup != nil — можно обновить только клавиатуру)
 func (bot *Bot) SendOrEdit(
-    c telebot.Context,
-    text string,
-    markup *telebot.ReplyMarkup,
-    opts ...SendEditOption,
+	c telebot.Context,
+	text string,
+	markup *telebot.ReplyMarkup,
+	opts ...SendEditOption,
 ) (*telebot.Message, error) {
-    cfg := sendEditCfg{ParseMode: telebot.ModeMarkdown}
-    for _, opt := range opts {
-        opt(&cfg)
-    }
+	cfg := sendEditCfg{ParseMode: telebot.ModeMarkdown}
+	for _, opt := range opts {
+		opt(&cfg)
+	}
 
-    sendOpts := &telebot.SendOptions{
-        ParseMode:           cfg.ParseMode,
-        ReplyMarkup:         markup,
-        ReplyTo:             cfg.ReplyTo,
-        DisableNotification: cfg.DisableNotification,
-        Protected:           cfg.ProtectContent,
-        AllowWithoutReply:   cfg.AllowWithoutReply,
-    }
+	sendOpts := &telebot.SendOptions{
+		ParseMode:           cfg.ParseMode,
+		ReplyMarkup:         markup,
+		ReplyTo:             cfg.ReplyTo,
+		DisableNotification: cfg.DisableNotification,
+		Protected:           cfg.ProtectContent,
+		AllowWithoutReply:   cfg.AllowWithoutReply,
+	}
 
-    if cfg.Edit && text == "" && markup != nil {
-        return bot.B.EditReplyMarkup(c.Message(), markup)
-    }
+	if cfg.Edit && text == "" && markup != nil {
+		return bot.B.EditReplyMarkup(c.Message(), markup)
+	}
 
-    if cfg.Edit {
-        m, err := bot.B.Edit(c.Message(), text, sendOpts)
-        if err != nil {
-            if strings.Contains(err.Error(), errMsgNotModified) {
-                if cfg.EditMarkupIfSame && markup != nil {
-                    return bot.B.EditReplyMarkup(c.Message(), markup)
-                }
-                if cfg.ForceChangeOnSame {
-                    return bot.B.Edit(c.Message(), text+zeroWidthJoiner, sendOpts)
-                }
-                return nil, nil
-            }
-            return nil, err
-        }
-        return m, nil
-    }
+	if cfg.Edit {
+		m, err := bot.B.Edit(c.Message(), text, sendOpts)
+		if err != nil {
+			if strings.Contains(err.Error(), errMsgNotModified) {
+				if cfg.EditMarkupIfSame && markup != nil {
+					return bot.B.EditReplyMarkup(c.Message(), markup)
+				}
+				if cfg.ForceChangeOnSame {
+					return bot.B.Edit(c.Message(), text+zeroWidthJoiner, sendOpts)
+				}
+				return nil, nil
+			}
+			return nil, err
+		}
+		return m, nil
+	}
 
-    return bot.B.Send(c.Recipient(), text, sendOpts)
+	return bot.B.Send(c.Recipient(), text, sendOpts)
 }

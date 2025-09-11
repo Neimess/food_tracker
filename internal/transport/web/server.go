@@ -2,12 +2,12 @@ package web
 
 import (
 	"context"
+	"embed"
 	"errors"
 	"html/template"
 	"net/http"
-	"time"
-	"embed"
 
+	"github.com/Neimess/food_tracker/internal/config"
 	"github.com/Neimess/food_tracker/internal/repository"
 )
 
@@ -15,14 +15,14 @@ import (
 var tmplFS embed.FS
 
 func loadTemplates() *template.Template {
-    return template.Must(template.ParseFS(tmplFS, "templates/*.tmpl"))
+	return template.Must(template.ParseFS(tmplFS, "templates/*.tmpl"))
 }
 
 type Server struct {
 	mux *http.ServeMux
 	tpl *template.Template
 	srv *http.Server
-
+	cfg *config.HTTPServer
 	Cat *CategoriesHandlers
 	Ing *IngredientsHandlers
 	Foo *FoodsHandlers
@@ -30,6 +30,7 @@ type Server struct {
 }
 
 func NewServer(
+	cfg *config.HTTPServer,
 	catRepo *repository.FoodCategoriesRepo,
 	depRepo *repository.DepartmentsRepo,
 	ingRepo *repository.IngredientsRepo,
@@ -40,6 +41,7 @@ func NewServer(
 	s := &Server{
 		mux: http.NewServeMux(),
 		tpl: tpl,
+		cfg: cfg,
 	}
 
 	s.Cat = &CategoriesHandlers{tpl: tpl, Repo: catRepo}
@@ -47,33 +49,28 @@ func NewServer(
 	s.Foo = &FoodsHandlers{tpl: tpl, Repo: foodsRepo, Cats: catRepo, FIng: fiRepo, Ings: ingRepo}
 	s.Dep = &DepartmentsHandlers{tpl: tpl, Repo: depRepo}
 
-	// routes
 	s.mux.HandleFunc("/admin", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/admin/foods", http.StatusFound)
 	})
 
-	// categories
 	s.mux.HandleFunc("/admin/categories", s.Cat.Index)         // GET
 	s.mux.HandleFunc("/admin/categories/new", s.Cat.New)       // GET
 	s.mux.HandleFunc("/admin/categories/create", s.Cat.Create) // POST
 	s.mux.HandleFunc("/admin/categories/edit", s.Cat.Edit)     // GET ?id=
 	s.mux.HandleFunc("/admin/categories/save", s.Cat.Save)     // POST
 
-	// ingredients
 	s.mux.HandleFunc("/admin/ingredients", s.Ing.Index)
 	s.mux.HandleFunc("/admin/ingredients/new", s.Ing.New)
 	s.mux.HandleFunc("/admin/ingredients/create", s.Ing.Create)
 	s.mux.HandleFunc("/admin/ingredients/edit", s.Ing.Edit) // ?id=
 	s.mux.HandleFunc("/admin/ingredients/save", s.Ing.Save)
 
-	// foods
 	s.mux.HandleFunc("/admin/foods", s.Foo.Index)
 	s.mux.HandleFunc("/admin/foods/new", s.Foo.New)
 	s.mux.HandleFunc("/admin/foods/create", s.Foo.Create)
 	s.mux.HandleFunc("/admin/foods/edit", s.Foo.Edit)
 	s.mux.HandleFunc("/admin/foods/save", s.Foo.Save)
 
-	// food composition
 	s.mux.HandleFunc("/admin/foods/compose", s.Foo.Compose)           // GET ?id=
 	s.mux.HandleFunc("/admin/foods/compose/add", s.Foo.ComposeAdd)    // POST
 	s.mux.HandleFunc("/admin/foods/compose/delete", s.Foo.ComposeDel) // POST
@@ -88,11 +85,11 @@ func NewServer(
 
 func (s *Server) ListenAndServe(addr string) error {
 	s.srv = &http.Server{
-		Addr:         addr,
+		Addr:         s.cfg.Address,
 		Handler:      s.registerMiddlewares(s.mux),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		ReadTimeout:  s.cfg.ReadTimeout,
+		WriteTimeout: s.cfg.WriteTimeout,
+		IdleTimeout:  s.cfg.IdleTimeout,
 	}
 	err := s.srv.ListenAndServe()
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
