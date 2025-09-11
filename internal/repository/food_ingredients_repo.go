@@ -24,7 +24,9 @@ func (r *FoodIngredientsRepo) ListByFood(ctx context.Context, foodID int64) ([]d
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	var res []domain.FoodIngredient
 	for rows.Next() {

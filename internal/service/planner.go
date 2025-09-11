@@ -276,6 +276,7 @@ func (s *PlannerService) cloneSelected() map[int64]int64 {
 	return out
 }
 
+//nolint:unused
 func (s *PlannerService) invalidateCart(ctx context.Context) {
 	now := time.Now()
 	daysUntilSaturday := (time.Saturday - now.Weekday() + 7) % 7

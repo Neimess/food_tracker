@@ -50,7 +50,13 @@ func main() {
 	if err := db.Ping(); err != nil {
 		log.Fatalf("db ping failed")
 	}
-	defer db.Close()
+	
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("failed to close db: %v", err)
+		}
+	}()
+	
 
 	cats := repository.NewFoodCategoriesRepo(db)
 	deps := repository.NewDepartmentsRepo(db)

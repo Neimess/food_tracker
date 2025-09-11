@@ -20,7 +20,6 @@ type CartRepoInMemory struct {
 	d        map[cartKey]domain.CartItem
 	mu       sync.RWMutex
 	filePath string
-	once     sync.Once
 }
 
 func NewCartRepo(filepath string) *CartRepoInMemory {

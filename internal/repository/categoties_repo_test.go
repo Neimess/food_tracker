@@ -35,8 +35,9 @@ func setupTestDB(t *testing.T) *sql.DB {
 
 func TestFoodCategoriesRepo(t *testing.T) {
 	db := setupTestDB(t)
-	defer db.Close()
-
+	defer func() {
+		_ = db.Close()
+	}()
 	repo := NewFoodCategoriesRepo(db)
 
 	cases := []Case{

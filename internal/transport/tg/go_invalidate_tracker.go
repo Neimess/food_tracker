@@ -8,6 +8,7 @@ import (
 	"gopkg.in/telebot.v3"
 )
 
+//nolint:unused
 func (bot *Bot) updateKeyboardOnInvalidate() {
 	for range bot.svc.InvalidateChan {
 		bot.mu.Lock()

@@ -23,8 +23,9 @@ func (r *IngredientsRepo) List(ctx context.Context) ([]domain.Ingredient, error)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
+	defer func() {
+		_ = rows.Close()
+	}()
 	var res []domain.Ingredient
 	for rows.Next() {
 		var ing domain.Ingredient

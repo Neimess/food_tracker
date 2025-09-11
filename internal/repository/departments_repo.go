@@ -20,8 +20,9 @@ func (r *DepartmentsRepo) List(ctx context.Context) ([]domain.IngredientDepartme
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
+	defer func() {
+		_ = rows.Close()
+	}()
 	var res []domain.IngredientDepartment
 	for rows.Next() {
 		var d domain.IngredientDepartment

@@ -25,12 +25,12 @@ func saveStateJSONAtomic(path string, st *persistedState, perm os.FileMode) erro
 	enc := json.NewEncoder(f)
 	enc.SetIndent("", "  ")
 	if err := enc.Encode(st); err != nil {
-		f.Close()
+		_ = f.Close()
 		_ = os.Remove(tmp)
 		return err
 	}
 	if err := f.Sync(); err != nil {
-		f.Close()
+		_ = f.Close()
 		_ = os.Remove(tmp)
 		return err
 	}
@@ -49,7 +49,9 @@ func loadStateJSON(path string) (*persistedState, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	data, err := io.ReadAll(f)
 	if err != nil {

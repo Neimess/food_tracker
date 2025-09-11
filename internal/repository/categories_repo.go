@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/Neimess/food_tracker/internal/domain"
 )
@@ -20,7 +21,11 @@ func (r *FoodCategoriesRepo) List(ctx context.Context) ([]domain.FoodCategory, e
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("failed to close rows: %v", err)
+		}
+	}()
 
 	var res []domain.FoodCategory
 	for rows.Next() {
