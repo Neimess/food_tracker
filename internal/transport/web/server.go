@@ -84,7 +84,7 @@ func NewServer(
 	return s
 }
 
-func (s *Server) ListenAndServe(addr string) error {
+func (s *Server) ListenAndServe() error {
 	s.srv = &http.Server{
 		Addr:         s.cfg.Address,
 		Handler:      s.registerMiddlewares(s.mux),
@@ -92,8 +92,8 @@ func (s *Server) ListenAndServe(addr string) error {
 		WriteTimeout: s.cfg.WriteTimeout,
 		IdleTimeout:  s.cfg.IdleTimeout,
 	}
+	log.Printf("HTTPServer started at: %s", s.cfg.Address)
 	err := s.srv.ListenAndServe()
-	log.Println("HTTPServer started at: %s", s.cfg.Address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}

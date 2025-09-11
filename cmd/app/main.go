@@ -27,7 +27,6 @@ var (
 )
 
 func main() {
-	log.SetFlags(0)
 	cfg := config.MustLoad()
 	cfg.App.Version = Version
 	log.Printf(`
@@ -72,7 +71,7 @@ func main() {
 	srvErr := make(chan error, 1)
 
 	go func() {
-		if err := websrv.ListenAndServe(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := websrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			srvErr <- err
 		}
 		close(srvErr)
