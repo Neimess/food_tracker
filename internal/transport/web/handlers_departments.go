@@ -13,20 +13,27 @@ type DepartmentsHandlers struct {
 	Repo *repository.DepartmentsRepo
 }
 
-func (h *DepartmentsHandlers) Index(w http.ResponseWriter, r *http.Request) {
-	items, _ := h.Repo.List(r.Context())
-	render(h.tpl, w, "departments_index.tmpl", map[string]any{"Items": items})
-}
-
 func (h *DepartmentsHandlers) New(w http.ResponseWriter, r *http.Request) {
 	render(h.tpl, w, "departments_form.tmpl", nil)
+}
+func (h *DepartmentsHandlers) Index(w http.ResponseWriter, r *http.Request) {
+	items, err := h.Repo.List(r.Context())
+	if err != nil {
+		handleError(w, "Не удалось получить список отделов", err, http.StatusInternalServerError)
+		return
+	}
+	render(h.tpl, w, "departments_index.tmpl", map[string]any{"Items": items})
 }
 
 func (h *DepartmentsHandlers) Create(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 	name := r.Form.Get("name")
+	if name == "" {
+		handleError(w, "Поле name обязательно", nil, http.StatusBadRequest)
+		return
+	}
 	if _, err := h.Repo.Create(r.Context(), name); err != nil {
-		http.Error(w, err.Error(), 500)
+		handleError(w, "Не удалось создать отдел", err, http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, "/admin/departments", http.StatusSeeOther)
@@ -36,7 +43,7 @@ func (h *DepartmentsHandlers) Edit(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
 	item, err := h.Repo.Get(r.Context(), id)
 	if err != nil {
-		http.Error(w, err.Error(), 404)
+		handleError(w, "Отдел не найден", err, http.StatusNotFound)
 		return
 	}
 	render(h.tpl, w, "departments_form.tmpl", map[string]any{"Item": item})
@@ -47,7 +54,7 @@ func (h *DepartmentsHandlers) Save(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(r.Form.Get("id"), 10, 64)
 	name := r.Form.Get("name")
 	if err := h.Repo.Update(r.Context(), id, name); err != nil {
-		http.Error(w, err.Error(), 500)
+		handleError(w, "Не удалось обновить отдел", err, http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, "/admin/departments", http.StatusSeeOther)

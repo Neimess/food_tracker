@@ -8,12 +8,30 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
-
 type Config struct {
-	Env       string  `yaml:"env" env:"ENV" envDefault:"dev"`
-	Version   string  `yaml:"version" env:"VERSION" end-default:"1.0.0"`
-	AdminCode string  `yaml:"admin_code" env:"ADMIN_CODE" envRequired:"true"`
-	TGToken   string `yaml:"tg_token" env:"TG_TOKEN" envRequired:"true"`
+	App      AppConfig      `yaml:"app"`
+	Telegram TelegramConfig `yaml:"telegram"`
+	DB       DBConfig       `yaml:"db"`
+	Cache    CacheConfig    `yaml:"cache"`
+}
+
+type AppConfig struct {
+	Env     string `yaml:"env" env:"ENV" env-default:"dev"`
+	Version string `yaml:"version" env:"VERSION" env-default:"1.0.0"`
+}
+
+type TelegramConfig struct {
+	Token        string  `yaml:"token" env:"TG_TOKEN" env-required:"true"`
+	AllowedUsers []int64 `yaml:"allowed_users" env:"TG_ALLOWED_USERS"`
+	WebAppURL    string  `yaml:"webapp_url" env:"WEBAPP_URL"`
+}
+
+type DBConfig struct {
+	Path string `yaml:"path" env:"DB_PATH" env-default:"storage.db"`
+}
+
+type CacheConfig struct {
+	Path string `yaml:"path" env:"CACHE_PATH" env-default:".cache/food-tracker"`
 }
 
 func MustLoad() *Config {

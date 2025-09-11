@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sort"
 	"strings"
 	"sync"
@@ -16,13 +17,16 @@ type cartKey struct {
 }
 
 type CartRepoInMemory struct {
-	d  map[cartKey]domain.CartItem
-	mu sync.RWMutex
+	d        map[cartKey]domain.CartItem
+	mu       sync.RWMutex
+	filePath string
+	once     sync.Once
 }
 
-func NewCartRepo() *CartRepoInMemory {
+func NewCartRepo(filepath string) *CartRepoInMemory {
 	return &CartRepoInMemory{
-		d: make(map[cartKey]domain.CartItem),
+		d:        make(map[cartKey]domain.CartItem),
+		filePath: filepath,
 	}
 }
 
@@ -97,4 +101,18 @@ func (r *CartRepoInMemory) Clear(ctx context.Context) error {
 	defer r.mu.Unlock()
 	r.d = make(map[cartKey]domain.CartItem)
 	return nil
+}
+
+func (r *CartRepoInMemory) ToggleChecked(ctx context.Context, id int64) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	for k, v := range r.d {
+		if v.IngredientID == int64(id) {
+			v.Checked = !v.Checked
+			r.d[k] = v
+			return nil
+		}
+	}
+	return fmt.Errorf("item %d not found", id)
 }

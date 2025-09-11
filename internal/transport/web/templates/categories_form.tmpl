@@ -1,9 +1,38 @@
 {{template "layout.tmpl" .}}
-<h1>{{if .Item}}Правка категории{{else}}Новая категория{{end}}</h1>
 
-<form method="post" action="{{if .Item}}/admin/categories/{{.Item.ID}}/save{{else}}/admin/categories/create{{end}}">
-  <label>Название
-    <input name="name" value="{{with .Item}}{{.Name}}{{end}}" required>
-  </label><br>
-  <button type="submit">Сохранить</button>
-</form>
+<div class="container mt-4">
+  <h1 class="mb-3">{{if .Item}}Правка категории{{else}}Новая категория{{end}}</h1>
+
+  <form method="post" action="{{if .Item}}/admin/categories/save{{else}}/admin/categories/create{{end}}" class="needs-validation" novalidate>
+    {{if .Item}}
+      <input type="hidden" name="id" value="{{.Item.ID}}">
+    {{end}}
+
+    <div class="mb-3">
+      <label for="name" class="form-label">Название</label>
+      <input id="name" name="name" class="form-control" 
+             value="{{with .Item}}{{.Name}}{{end}}" required>
+      <div class="invalid-feedback">Укажите название категории.</div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Сохранить</button>
+    <a href="/admin/categories" class="btn btn-secondary">Отмена</a>
+  </form>
+</div>
+
+<script>
+  // активация встроенной валидации Bootstrap
+  (function () {
+    'use strict'
+    const forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        form.classList.add('was-validated')
+      }, false)
+    })
+  })()
+</script>

@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS ingredient_departments (
 CREATE TABLE IF NOT EXISTS foods (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL,
-  is_complex INTEGER NOT NULL DEFAULT 0,
   food_category_id INTEGER NOT NULL,
   FOREIGN KEY (food_category_id) REFERENCES food_categories(id)
     ON UPDATE RESTRICT ON DELETE RESTRICT

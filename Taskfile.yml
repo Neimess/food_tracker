@@ -3,10 +3,9 @@
 version: '3'
 
 vars:
-  GREETING: Hello, World!
+  DB:  ./storage.db
 
 tasks:
-  default:
+  migrate:
     cmds:
-      - echo "{{.GREETING}}"
-    silent: true
+      - goose -dir ./migrations sqlite3 {{.DB}} up

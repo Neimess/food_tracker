@@ -1,12 +1,39 @@
 {{template "layout.tmpl" .}}
-<h1>{{if .Item}}Правка отдела{{else}}Новый отдел{{end}}</h1>
 
-<form method="post" action="{{if .Item}}/admin/departments/save{{else}}/admin/departments/create{{end}}">
-  {{if .Item}}<input type="hidden" name="id" value="{{.Item.ID}}">{{end}}
-  
-  <label>Название
-    <input type="text" name="name" value="{{with .Item}}{{.Name}}{{end}}" required>
-  </label><br>
-  
-  <button type="submit">Сохранить</button>
-</form>
+<div class="container mt-4">
+  <h1 class="mb-3">{{if .Item}}Правка отдела{{else}}Новый отдел{{end}}</h1>
+
+  <form method="post" action="{{if .Item}}/admin/departments/save{{else}}/admin/departments/create{{end}}" class="needs-validation" novalidate>
+    {{if .Item}}
+      <input type="hidden" name="id" value="{{.Item.ID}}">
+    {{end}}
+
+    <div class="mb-3">
+      <label for="name" class="form-label">Название</label>
+      <input id="name" type="text" name="name"
+             value="{{with .Item}}{{.Name}}{{end}}"
+             class="form-control" required>
+      <div class="invalid-feedback">Введите название отдела.</div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Сохранить</button>
+    <a href="/admin/departments" class="btn btn-secondary">Отмена</a>
+  </form>
+</div>
+
+<script>
+  // активация встроенной валидации Bootstrap
+  (function () {
+    'use strict';
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.prototype.slice.call(forms).forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+</script>

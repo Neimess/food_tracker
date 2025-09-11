@@ -1,1 +1,14 @@
-env: dev
+app:
+  env: dev            
+  version: 1.0.0
+
+telegram:
+  token: "PUT_YOUR_TG_BOT_TOKEN_HERE"     
+  allowed_users: []                       
+  webapp_url: "https://your-domain.com"
+
+db:
+  path: "storage.db"                      
+
+cache:
+  path: ".cache/food-tracker"             

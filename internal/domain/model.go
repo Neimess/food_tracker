@@ -13,7 +13,6 @@ type IngredientDepartment struct {
 type Food struct {
 	ID           int64
 	Name         string
-	IsComplex    bool
 	CategoryID   int64
 	CategoryName string
 }

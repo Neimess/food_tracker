@@ -4,10 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/Neimess/food_tracker/internal/config"
@@ -20,10 +22,19 @@ import (
 
 func main() {
 	cfg := config.MustLoad()
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	fmt.Println(cfg)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
-	db, _ := sql.Open("sqlite", "file:foods.db?_fk=1")
+	dsn := fmt.Sprintf("file:%s?_fk=1", cfg.DB.Path)
+	db, err := sql.Open("sqlite", dsn)
+	if err != nil {
+		log.Fatalf("create db failed: %v", err)
+	}
+
+	if err := db.Ping(); err != nil {
+		log.Fatalf("db ping failed")
+	}
 	defer db.Close()
 
 	cats := repository.NewFoodCategoriesRepo(db)
@@ -31,7 +42,7 @@ func main() {
 	ings := repository.NewIngredientsRepo(db)
 	foods := repository.NewFoodsRepo(db)
 	fi := repository.NewFoodIngredientsRepo(db)
-	cart := repository.NewCartRepo()
+	cart := repository.NewCartRepo("cart.json")
 
 	websrv := web.NewServer(cats, deps, ings, foods, fi)
 	srvErr := make(chan error, 1)
@@ -43,9 +54,12 @@ func main() {
 		close(srvErr)
 	}()
 
-	svcP := service.NewPlannerService(foods, fi, ings, cart)
+	svcP := service.NewPlannerService(cfg.Cache.Path, foods, fi, ings, cart)
+	if err := svcP.Preload(ctx); err != nil {
+		log.Printf("preload failed: %v", err)
+	}
 
-	tgBot, err := tg.NewBot(ctx, cfg.TGToken, svcP)
+	tgBot, err := tg.NewBot(ctx, cfg.Telegram.Token, cfg.Telegram.WebAppURL, cfg.Telegram.AllowedUsers, svcP)
 	if err != nil {
 		panic(err)
 	}
@@ -63,9 +77,11 @@ func main() {
 	shutCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	log.Println("shutting down...")
-
 	if err := websrv.Shutdown(shutCtx); err != nil {
 		log.Printf("http shutdown: %v", err)
+	}
+	if err := svcP.Close(shutCtx); err != nil {
+		log.Printf("service shutting down failed: %v", err)
 	}
 	tgBot.Stop()
 	log.Println("done")

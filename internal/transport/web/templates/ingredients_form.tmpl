@@ -1,20 +1,52 @@
 {{template "layout.tmpl" .}}
-<h1>{{if .Item}}Правка ингредиента{{else}}Новый ингредиент{{end}}</h1>
 
-<form method="post" action="{{if .Item}}/admin/ingredients/save{{else}}/admin/ingredients/create{{end}}">
-  {{if .Item}}<input type="hidden" name="id" value="{{.Item.ID}}">{{end}}
-  
-  <label>Название
-    <input type="text" name="name" value="{{with .Item}}{{.Name}}{{end}}" required>
-  </label><br>
-  
-  <label>Отдел
-    <select name="department_id" required>
-      {{range .Deps}}
-      <option value="{{.ID}}" {{with $.Item}}{{if eq .DepartmentID $.ID}}selected{{end}}{{end}}>{{.Name}}</option>
-      {{end}}
-    </select>
-  </label><br>
-  
-  <button type="submit">Сохранить</button>
-</form>
+<div class="container mt-4">
+  <h1 class="mb-3">{{if .Item}}Правка товара{{else}}Новый товар{{end}}</h1>
+
+  <form method="post" action="{{if .Item}}/admin/ingredients/save{{else}}/admin/ingredients/create{{end}}" class="needs-validation" novalidate>
+    {{if .Item}}
+      <input type="hidden" name="id" value="{{.Item.ID}}">
+    {{end}}
+
+    <!-- Название -->
+    <div class="mb-3">
+      <label for="name" class="form-label">Название</label>
+      <input id="name" type="text" name="name" 
+             value="{{with .Item}}{{.Name}}{{end}}" 
+             class="form-control" required>
+      <div class="invalid-feedback">Введите название товара.</div>
+    </div>
+
+    <!-- Отдел -->
+    <div class="mb-4">
+      <label for="department_id" class="form-label">Отдел</label>
+      <select id="department_id" name="department_id" class="form-select" required>
+        {{range .Deps}}
+          {{$dep := .}}
+          <option value="{{$dep.ID}}" {{with $.Item}}{{if eq .DepartmentID $dep.ID}}selected{{end}}{{end}}>{{$dep.Name}}</option>
+        {{end}}
+      </select>
+      <div class="invalid-feedback">Выберите отдел.</div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Сохранить</button>
+    <a href="/admin/ingredients" class="btn btn-secondary">Отмена</a>
+  </form>
+</div>
+
+<script>
+  // активация встроенной валидации Bootstrap
+  (function () {
+    'use strict';
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.prototype.slice.call(forms).forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+</script>

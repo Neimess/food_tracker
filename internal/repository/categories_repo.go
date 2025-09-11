@@ -40,3 +40,18 @@ func (r *FoodCategoriesRepo) Create(ctx context.Context, name string) (int64, er
 	}
 	return result.LastInsertId()
 }
+
+func (r *FoodCategoriesRepo) Get(ctx context.Context, id int64) (*domain.FoodCategory, error) {
+	var fc domain.FoodCategory
+	err := r.db.QueryRowContext(ctx, "SELECT id,name FROM food_categories WHERE id = ?", id).
+		Scan(&fc.ID, &fc.Name)
+	if err != nil {
+		return nil, err
+	}
+	return &fc, nil
+}
+
+func (r *FoodCategoriesRepo) Update(ctx context.Context, id int64, name string) error {
+	_, err := r.db.ExecContext(ctx, "UPDATE food_categories SET name = ? WHERE id = ?", name, id)
+	return err
+}

@@ -1,93 +1,121 @@
 {{template "layout.tmpl" .}}
-<h1>{{if .Item}}Правка блюда{{else}}Новое блюдо{{end}}</h1>
+<div class="container mt-4">
+  <h1 class="mb-3">{{if .Item}}Правка блюда{{else}}Новое блюдо{{end}}</h1>
 
-<form method="post" action="{{if .Item}}/admin/foods/save{{else}}/admin/foods/create{{end}}">
-  {{if .Item}}<input type="hidden" name="id" value="{{.Item.ID}}">{{end}}
+  <form method="post" action="{{if .Item}}/admin/foods/save{{else}}/admin/foods/create{{end}}" class="needs-validation" novalidate>
+    {{if .Item}}<input type="hidden" name="id" value="{{.Item.ID}}">{{end}}
 
-  <label>Название
-    <input name="name" value="{{with .Item}}{{.Name}}{{end}}" required>
-  </label><br>
+    <!-- Название -->
+    <div class="mb-3">
+      <label for="name" class="form-label">Название</label>
+      <input id="name" name="name" class="form-control" value="{{with .Item}}{{.Name}}{{end}}" required>
+      <div class="invalid-feedback">Укажите название блюда.</div>
+    </div>
 
-  <label>Категория
-    <select name="category_id" required>
-      {{range .Cats}}
-        <option value="{{.ID}}" {{with $.Item}}{{if eq .CategoryID $.ID}}selected{{end}}{{end}}>{{.Name}}</option>
-      {{end}}
-    </select>
-  </label><br>
+    <!-- Категория -->
+    <div class="mb-4">
+      <label for="category_id" class="form-label">Категория</label>
+      <select id="category_id" name="category_id" class="form-select" required>
+        {{range .Cats}}
+          {{$cat := .}}
+          <option value="{{$cat.ID}}" {{with $.Item}}{{if eq .CategoryID $cat.ID}}selected{{end}}{{end}}>{{$cat.Name}}</option>
+        {{end}}
+      </select>
+      <div class="invalid-feedback">Выберите категорию.</div>
+    </div>
 
-  <label class="checkbox">
-    <input type="checkbox" id="is_complex" name="is_complex" {{with .Item}}{{if .IsComplex}}checked{{end}}{{end}}>
-    Сложное блюдо
-  </label>
+    <!-- Состав -->
+    <div id="complex_section" class="mb-4">
+      <h3 class="h5 mb-3">Состав</h3>
 
-  <!-- Секция ингредиентов: показывается только если стоит чекбокс -->
-  <div id="complex_section" style="margin-top:12px; display:none;">
-    <h3>Ингредиенты блюда</h3>
-    <table id="ing_table">
-      <tr><th>Ингредиент</th><th>Кол-во</th><th>Ед.</th><th></th></tr>
+      <table id="ing_table" class="table table-sm table-bordered align-middle">
+        <thead class="table-light">
+          <tr>
+            <th style="width:40%">Товар</th>
+            <th style="width:20%">Кол-во</th>
+            <th style="width:20%">Ед.</th>
+            <th style="width:12%"></th>
+          </tr>
+        </thead>
+        <tbody>
+        {{range .Rows}}
+          <tr>
+            <td>
+              {{$row := .}}
+              <select name="ingredient_id[]" class="form-select">
+                {{range $.Ings}}
+                  <option value="{{.ID}}" {{if eq .ID $row.IngredientID}}selected{{end}}>{{.Name}}</option>
+                {{end}}
+              </select>
+            </td>
+            <td>
+              <input type="number" step="0.01" name="quantity[]" value="{{$row.Quantity}}" class="form-control" required>
+            </td>
+            <td>
+              <input type="text" name="unit[]" value="{{$row.Unit}}" class="form-control" required>
+            </td>
+            <td class="text-center">
+              <button type="button" class="btn btn-sm btn-outline-danger" onclick="delRow(this)" aria-label="Удалить строку">✕</button>
+            </td>
+          </tr>
+        {{end}}
+        </tbody>
+      </table>
 
-      {{range .Rows}}
-      <tr>
-        <td>
-          {{$row := .}}
-          <select name="ingredient_id[]">
-            {{range $.Ings}}
-              <option value="{{.ID}}" {{if eq .ID $row.IngredientID}}selected{{end}}>{{.Name}}</option>
-            {{end}}
-          </select>
-        </td>
-        <td><input type="number" step="0.01" name="quantity[]" value="{{$row.Quantity}}" required></td>
-        <td><input type="text" name="unit[]" value="{{$row.Unit}}" required></td>
-        <td><button type="button" onclick="delRow(this)">✕</button></td>
-      </tr>
-      {{end}}
+      <button type="button" class="btn btn-outline-primary" onclick="addRow()">+ Добавить товар</button>
+    </div>
 
-
-    </table>
-
-    <button type="button" onclick="addRow()">+ Добавить ингредиент</button>
-  </div>
-
-  <br>
-  <button type="submit">Сохранить</button>
-</form>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-success">Сохранить</button>
+      <a href="/admin/foods" class="btn btn-secondary">Отмена</a>
+    </div>
+  </form>
+</div>
 
 <script>
 (function(){
-  const box = document.getElementById('is_complex');
-  const sec = document.getElementById('complex_section');
-  function toggle(){ sec.style.display = box.checked ? 'block' : 'none'; }
-  box.addEventListener('change', toggle);
-  toggle();
+  // Встроенная валидация Bootstrap
+  (function () {
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.prototype.slice.call(forms).forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) { event.preventDefault(); event.stopPropagation(); }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
 
   window.addRow = function(){
-    const table = document.getElementById('ing_table');
+    const tbody = document.querySelector('#ing_table tbody');
     const tr = document.createElement('tr');
 
-    // ячейка select ингредиента
+    // Товар
     const td1 = document.createElement('td');
     td1.innerHTML = `\
-<select name="ingredient_id[]">
+<select name="ingredient_id[]" class="form-select">
   {{range .Ings}}<option value="{{.ID}}">{{.Name}}</option>{{end}}
 </select>`;
-    // количество
+
+    // Кол-во
     const td2 = document.createElement('td');
-    td2.innerHTML = '<input type="number" step="0.01" name="quantity[]" required>';
-    // ед.
+    td2.innerHTML = '<input type="number" step="0.01" name="quantity[]" class="form-control" required>';
+
+    // Ед.
     const td3 = document.createElement('td');
-    td3.innerHTML = '<input type="text" name="unit[]" placeholder="г/мл/шт" required>';
-    // удалить
+    td3.innerHTML = '<input type="text" name="unit[]" class="form-control" placeholder="г/мл/шт" required>';
+
+    // Удалить
     const td4 = document.createElement('td');
-    td4.innerHTML = '<button type="button" onclick="delRow(this)">✕</button>';
+    td4.className = 'text-center';
+    td4.innerHTML = '<button type="button" class="btn btn-sm btn-outline-danger" onclick="delRow(this)" aria-label="Удалить строку">✕</button>';
 
     tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tr.appendChild(td4);
-    table.appendChild(tr);
+    tbody.appendChild(tr);
   }
 
   window.delRow = function(btn){
     const tr = btn.closest('tr');
-    tr.parentNode.removeChild(tr);
+    if (tr) tr.remove();
   }
 })();
 </script>

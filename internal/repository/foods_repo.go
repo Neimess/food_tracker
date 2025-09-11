@@ -15,7 +15,7 @@ func NewFoodsRepo(db *sql.DB) *FoodsRepo {
 
 func (r *FoodsRepo) List(ctx context.Context) ([]domain.Food, error) {
 	const q = `
-	SELECT f.id, f.name, f.is_complex, f.food_category_id, c.name
+	SELECT f.id, f.name, f.food_category_id, c.name
 	FROM foods f
 	JOIN food_categories c ON f.food_category_id = c.id
 	ORDER BY f.name`
@@ -28,7 +28,7 @@ func (r *FoodsRepo) List(ctx context.Context) ([]domain.Food, error) {
 	var res []domain.Food
 	for rows.Next() {
 		var f domain.Food
-		if err := rows.Scan(&f.ID, &f.Name, &f.IsComplex, &f.CategoryID, &f.CategoryName); err != nil {
+		if err := rows.Scan(&f.ID, &f.Name, &f.CategoryID, &f.CategoryName); err != nil {
 			return nil, err
 		}
 		res = append(res, f)
@@ -38,32 +38,32 @@ func (r *FoodsRepo) List(ctx context.Context) ([]domain.Food, error) {
 
 func (r *FoodsRepo) Get(ctx context.Context, id int64) (*domain.Food, error) {
 	const q = `
-	SELECT f.id, f.name, f.is_complex, f.food_category_id, c.name
+	SELECT f.id, f.name, f.food_category_id, c.name
 	FROM foods f
 	JOIN food_categories c ON f.food_category_id = c.id
 	WHERE f.id = ?`
 	var f domain.Food
-	err := r.DB.QueryRowContext(ctx, q, id).Scan(&f.ID, &f.Name, &f.IsComplex, &f.CategoryID, &f.CategoryName)
+	err := r.DB.QueryRowContext(ctx, q, id).Scan(&f.ID, &f.Name, &f.CategoryID, &f.CategoryName)
 	if err != nil {
 		return nil, err
 	}
 	return &f, nil
 }
 
-func (r *FoodsRepo) Create(ctx context.Context, name string, isComplex bool, categoryID int64) (int64, error) {
+func (r *FoodsRepo) Create(ctx context.Context, name string, categoryID int64) (int64, error) {
 	res, err := r.DB.ExecContext(ctx,
-		`INSERT INTO foods(name, is_complex, food_category_id) VALUES(?,?,?)`,
-		name, isComplex, categoryID)
+		`INSERT INTO foods(name, food_category_id) VALUES(?,?)`,
+		name, categoryID)
 	if err != nil {
 		return 0, err
 	}
 	return res.LastInsertId()
 }
 
-func (r *FoodsRepo) Update(ctx context.Context, id int64, name string, isComplex bool, categoryID int64) error {
+func (r *FoodsRepo) Update(ctx context.Context, id int64, name string, categoryID int64) error {
 	_, err := r.DB.ExecContext(ctx,
-		`UPDATE foods SET name=?, is_complex=?, food_category_id=? WHERE id=?`,
-		name, isComplex, categoryID, id)
+		`UPDATE foods SET name=?, food_category_id=? WHERE id=?`,
+		name, categoryID, id)
 	return err
 }
 

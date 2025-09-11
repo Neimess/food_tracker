@@ -1,16 +1,30 @@
 {{template "layout.tmpl" .}}
-<h1>Отделы ингредиентов</h1>
 
-<a class="button" href="/admin/departments/new">+ Новый отдел</a>
+<div class="container mt-4">
+  <h1 class="mb-3">Отделы магазина</h1>
 
-<table>
-  <tr><th>Название</th><th></th></tr>
-  {{range .Items}}
-  <tr>
-    <td>{{.Name}}</td>
-    <td>
-      <a href="/admin/departments/edit?id={{.ID}}">Править</a>
-    </td>
-  </tr>
-  {{end}}
-</table>
+  <a href="/admin/departments/new" class="btn btn-primary mb-3">+ Новый отдел</a>
+
+  <table class="table table-striped table-bordered align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Название</th>
+        <th style="width: 120px;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Items}}
+      <tr>
+        <td>{{.Name}}</td>
+        <td>
+          <a href="/admin/departments/edit?id={{.ID}}" class="btn btn-sm btn-outline-secondary">Править</a>
+        </td>
+      </tr>
+      {{else}}
+      <tr>
+        <td colspan="2" class="text-center text-muted">Нет отделов</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>

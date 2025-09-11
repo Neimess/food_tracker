@@ -42,15 +42,15 @@ func (r *DepartmentsRepo) Create(ctx context.Context, name string) (int64, error
 }
 
 func (r *DepartmentsRepo) Get(ctx context.Context, id int64) (*domain.IngredientDepartment, error) {
-    row := r.db.QueryRowContext(ctx, `SELECT id, name FROM ingredient_departments WHERE id=?`, id)
-    var d domain.IngredientDepartment
-    if err := row.Scan(&d.ID, &d.Name); err != nil {
-        return nil, err
-    }
-    return &d, nil
+	row := r.db.QueryRowContext(ctx, `SELECT id, name FROM ingredient_departments WHERE id=?`, id)
+	var d domain.IngredientDepartment
+	if err := row.Scan(&d.ID, &d.Name); err != nil {
+		return nil, err
+	}
+	return &d, nil
 }
 
 func (r *DepartmentsRepo) Update(ctx context.Context, id int64, name string) error {
-    _, err := r.db.ExecContext(ctx, `UPDATE ingredient_departments SET name=? WHERE id=?`, name, id)
-    return err
+	_, err := r.db.ExecContext(ctx, `UPDATE ingredient_departments SET name=? WHERE id=?`, name, id)
+	return err
 }

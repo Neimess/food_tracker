@@ -1,2 +1,7 @@
 build/
+data/
+bin/
 *.db
+*.json
+*.cache
+.env

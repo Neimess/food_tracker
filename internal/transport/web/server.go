@@ -81,7 +81,7 @@ func NewServer(
 func (s *Server) ListenAndServe(addr string) error {
 	s.srv = &http.Server{
 		Addr:         addr,
-		Handler:      s.mux,
+		Handler:      s.registerMiddlewares(s.mux),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,
