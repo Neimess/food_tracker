@@ -35,6 +35,8 @@ type TelegramConfig struct {
 	Token        string  `yaml:"token" env:"TG_TOKEN" env-required:"true"`
 	AllowedUsers []int64 `yaml:"allowed_users" env:"TG_ALLOWED_USERS"`
 	WebAppURL    string  `yaml:"webapp_url" env:"WEBAPP_URL"`
+	Address		 string  `yaml:"address" env:"TG_ADDRESS" env-default:"8090"`
+	URL		 	 string  `yaml:"url" env:"TG_URL" env-required:"true"`
 }
 
 type DBConfig struct {

@@ -1,0 +1,12 @@
+name: production
+
+services:
+  backend:
+    image: neimes/store-backend:latest
+    container_name: foodtracker
+    volumes:
+      - ./configs:/app/configs:ro
+    restart: unless-stopped
+    command: ["--config=/configs/config.yaml"]
+
+

@@ -5,6 +5,8 @@ telegram:
   token: "PUT_YOUR_TG_BOT_TOKEN_HERE"
   allowed_users: []
   webapp_url: "https://your-domain.com"
+  address: "0.0.0.0:8090"
+  webhook_url: "https://your-domain.com/bot"
 
 db:
   path: "storage.db"

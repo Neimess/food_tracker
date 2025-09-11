@@ -5,6 +5,7 @@ import (
 	"embed"
 	"errors"
 	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/Neimess/food_tracker/internal/config"
@@ -92,6 +93,7 @@ func (s *Server) ListenAndServe(addr string) error {
 		IdleTimeout:  s.cfg.IdleTimeout,
 	}
 	err := s.srv.ListenAndServe()
+	log.Println("HTTPServer started at: %s", s.cfg.Address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}

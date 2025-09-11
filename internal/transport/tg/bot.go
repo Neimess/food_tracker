@@ -6,8 +6,6 @@ import (
 	"log"
 	"sync"
 
-	"time"
-
 	"github.com/Neimess/food_tracker/internal/config"
 	"github.com/Neimess/food_tracker/internal/service"
 	"gopkg.in/telebot.v3"
@@ -26,8 +24,13 @@ type Bot struct {
 
 func NewBot(ctx context.Context, cfg *config.TelegramConfig, svc *service.PlannerService) (*Bot, error) {
 	pref := telebot.Settings{
-		Token:       cfg.Token,
-		Poller:      &telebot.LongPoller{Timeout: 10 * time.Second},
+		Token: cfg.Token,
+		Poller: &telebot.Webhook{
+			Endpoint: &telebot.WebhookEndpoint{
+				PublicURL: cfg.URL + cfg.Token,
+			},
+			Listen: cfg.Address,
+		},
 		Synchronous: false,
 		OnError: func(err error, c telebot.Context) {
 			chat := "<nil>"
@@ -45,7 +48,7 @@ func NewBot(ctx context.Context, cfg *config.TelegramConfig, svc *service.Planne
 }
 
 func (bot *Bot) Start() {
-	log.Println("Telegram bot started")
+	log.Printf("Telegram bot started at: %s", bot.cfg.Address)
 	bot.B.Use(ShortLogger)
 	bot.B.Use(middleware.Whitelist(bot.cfg.AllowedUsers...))
 	bot.B.Use(middleware.AutoRespond())

@@ -23,9 +23,11 @@ import (
 var (
 	Version   = "1.0.0"
 	BuildTime = "unknown"
+	Commit = "unknown"
 )
 
 func main() {
+	log.SetFlags(0)
 	cfg := config.MustLoad()
 	cfg.App.Version = Version
 	log.Printf(`
@@ -34,9 +36,10 @@ func main() {
 -------------------------------------------
   Version   : %s
   BuildTime : %s
+  Commit    : %s
   Env       : %s
 ===========================================
-`, Version, BuildTime, cfg.App.Env)
+`, Version, BuildTime, Commit, cfg.App.Env)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
@@ -50,7 +53,7 @@ func main() {
 	if err := db.Ping(); err != nil {
 		log.Fatalf("db ping failed")
 	}
-	
+
 	defer func() {
 		if err := db.Close(); err != nil {
 			log.Printf("failed to close db: %v", err)
