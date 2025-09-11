@@ -17,7 +17,7 @@ type Config struct {
 
 type AppConfig struct {
 	Env     string `yaml:"env" env:"ENV" env-default:"dev"`
-	Version string `yaml:"version" env:"VERSION" env-default:"1.0.0"`
+	Version string
 }
 
 type TelegramConfig struct {

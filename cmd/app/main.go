@@ -20,9 +20,16 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+var (
+	Version   = "1.0.0"
+	BuildTime = "unknown"
+)
+
 func main() {
 	cfg := config.MustLoad()
-	fmt.Println(cfg)
+	cfg.App.Version = Version
+	log.Printf("Version: %s, BuildTime: %s, Env: %s", Version, BuildTime, cfg.App.Env)
+	
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 

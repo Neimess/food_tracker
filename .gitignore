@@ -1,7 +1,8 @@
 build/
 data/
 bin/
+.cache/
+.task/
 *.db
 *.json
-*.cache
 .env
