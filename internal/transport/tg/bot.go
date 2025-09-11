@@ -51,7 +51,6 @@ func (bot *Bot) Start() {
 	bot.B.Use(middleware.AutoRespond())
 	bot.B.Use(middleware.Recover())
 	bot.registerHandlers()
-	go bot.updateKeyboardOnInvalidate()
 	bot.B.Start()
 }
 

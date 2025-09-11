@@ -10,9 +10,7 @@ import (
 )
 
 func (bot *Bot) handleAddFood(c telebot.Context) error {
-	var payload struct {
-		ID int64 `json:"id"`
-	}
+	var payload DefPayload
 	if err := json.Unmarshal([]byte(c.Data()), &payload); err != nil {
 		return c.Respond(&telebot.CallbackResponse{Text: "Некорректные данные"})
 	}

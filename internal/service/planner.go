@@ -32,8 +32,6 @@ type PlannerService struct {
 	preloadOnce sync.Once
 	preloadErr  error
 
-	cacheDur time.Duration
-
 	InvalidateChan chan struct{}
 }
 
@@ -81,7 +79,6 @@ func (s *PlannerService) Preload(ctx context.Context) error {
 			_ = s.cartRepo.AddDelta(ctx, &st.Cart[i])
 		}
 	})
-	go s.invalidateCart(ctx)
 	return s.preloadErr
 }
 

@@ -28,7 +28,15 @@ var (
 func main() {
 	cfg := config.MustLoad()
 	cfg.App.Version = Version
-	log.Printf("Version: %s, BuildTime: %s, Env: %s", Version, BuildTime, cfg.App.Env)
+	log.Printf(`
+===========================================
+  Application started
+-------------------------------------------
+  Version   : %s
+  BuildTime : %s
+  Env       : %s
+===========================================
+`, Version, BuildTime, cfg.App.Env)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
