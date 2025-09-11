@@ -24,7 +24,7 @@ type Bot struct {
 	webAppURL      string
 }
 
-func NewBot(ctx context.Context, token, webAppURLs string, usersWhiteList []int64, svc *service.PlannerService) (*Bot, error) {
+func NewBot(ctx context.Context, token, webAppURL string, usersWhiteList []int64, svc *service.PlannerService) (*Bot, error) {
 	pref := telebot.Settings{
 		Token:       token,
 		Poller:      &telebot.LongPoller{Timeout: 10 * time.Second},
@@ -41,7 +41,7 @@ func NewBot(ctx context.Context, token, webAppURLs string, usersWhiteList []int6
 	if err != nil {
 		return nil, err
 	}
-	return &Bot{B: b, svc: svc, lastMenus: make(map[int64]int), usersWhiteList: usersWhiteList}, nil
+	return &Bot{B: b, svc: svc, lastMenus: make(map[int64]int), usersWhiteList: usersWhiteList, webAppURL: webAppURL}, nil
 }
 
 func (bot *Bot) Start() {

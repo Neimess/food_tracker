@@ -6,9 +6,17 @@ import (
 	"html/template"
 	"net/http"
 	"time"
+	"embed"
 
 	"github.com/Neimess/food_tracker/internal/repository"
 )
+
+//go:embed templates/*.tmpl
+var tmplFS embed.FS
+
+func loadTemplates() *template.Template {
+    return template.Must(template.ParseFS(tmplFS, "templates/*.tmpl"))
+}
 
 type Server struct {
 	mux *http.ServeMux
@@ -28,7 +36,7 @@ func NewServer(
 	foodsRepo *repository.FoodsRepo,
 	fiRepo *repository.FoodIngredientsRepo,
 ) *Server {
-	tpl := template.Must(template.ParseGlob("internal/transport/web/templates/*.tmpl"))
+	tpl := loadTemplates()
 	s := &Server{
 		mux: http.NewServeMux(),
 		tpl: tpl,
